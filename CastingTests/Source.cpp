@@ -7,6 +7,7 @@
 // run in release with optimizations and target x64, using Visual Studio 2017
 
 #define USE_MEMCPY_WORKAROUND 0
+#define USE_UNION_TRICK 0
 
 #include <iostream>
 #include <xmmintrin.h>
@@ -16,8 +17,14 @@ class Vector3 {
 	// just having this __m128 here is an issue. It doesn't matter if you use it or not
 	// the original implementation where I discovered this used a union here (which is UB),
 	// but the bug/weirdness doesn't seem to care either way
-	__m128 mVec128;
-	float m_floats[4];
+#if USE_UNION_TRICK
+	union {
+#endif
+		__m128 mVec128;
+		float m_floats[4];
+#if USE_UNION_TRICK
+	};
+#endif
 public:
 	Vector3(float x, float y, float z) {
 		m_floats[0] = x;
