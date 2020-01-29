@@ -42,10 +42,13 @@ struct PackedData {
 };
 
 int main() {
+	// arbitrary buffer, represents a packet to de/serialize
 	char* buffer = new char[10000];
+	// set up values to pack
 	uint64_t offset = sizeof(uint64_t);
 	PackedData myData = { 123456789ull, Vector3(1,1,1) };
 	
+	// pack data into buffer
 	*(reinterpret_cast<uint64_t*>(buffer)) = offset;
 #if USE_MEMCPY_WORKAROUND
 	memcpy(buffer + offset, &myData, sizeof(PackedData)); 
@@ -57,6 +60,7 @@ int main() {
 	// in real code, the buffer would get passed off to somewhere else to unpack
 	// but for the purposes of this test it's unnecessary.
 
+	// unpack data
 	auto exOffset = *(reinterpret_cast<uint64_t*>(buffer));
 #if USE_MEMCPY_WORKAROUND
 	PackedData exData; memcpy(&exData, buffer + offset, sizeof(PackedData));
@@ -64,7 +68,7 @@ int main() {
 	auto exData = *(reinterpret_cast<PackedData*>(buffer + offset)); // this would also throw
 #endif
 	
-
+	// check integrity
 	int exitCode = 0;
 	if (offset != exOffset || myData.size != exData.size || myData.vector != exData.vector) {
 		exitCode = 1;
